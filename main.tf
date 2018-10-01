@@ -169,6 +169,11 @@ resource "aws_iam_role_policy" "lambda_policy" {
         "Effect": "Allow",
         "Action": "sns:Publish",
         "Resource": "${aws_sns_topic.bucket_alerts.arn}"
+    },
+	{
+            "Effect": "Allow",
+            "Action": "s3:*",
+            "Resource": "*"
     }
   ]
 }
@@ -222,6 +227,7 @@ resource "aws_cloudwatch_event_rule" "lambda_trigger_rule" {
     ],
     "eventName": [
       "PutBucketAcl",
+	  "PutBucketPolicy",
       "CreateBucket"
     ]
   }
