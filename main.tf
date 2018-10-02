@@ -155,27 +155,29 @@ resource "aws_iam_role_policy" "lambda_policy" {
 
   policy = <<POLICY
 {
-  "Version": "2012-10-17",
-  "Statement": [
-    {
-      "Effect": "Allow",
-      "Action": [
-        "logs:CreateLogGroup",
-        "logs:CreateLogStream",
-        "logs:PutLogEvents"
-      ],
-      "Resource": "arn:aws:logs:*:*:*"
-    },{
-        "Effect": "Allow",
-        "Action": "sns:Publish",
-        "Resource": "${aws_sns_topic.bucket_alerts.arn}"
-    },
-	{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Sid": "VisualEditor0",
+            "Effect": "Allow",
+            "Action": [
+                "logs:CreateLogStream",
+				"logs:CreateLogGroup",
+                "sns:Publish",
+                "logs:PutLogEvents"
+            ],
+            "Resource": [
+                "arn:aws:sns:us-east-1:961508331227:s3-bucket-public-access-alert-tf",
+                "arn:aws:logs:*:*:*"
+            ]
+        },
+        {
+            "Sid": "VisualEditor1",
             "Effect": "Allow",
             "Action": "s3:*",
             "Resource": "*"
-    }
-  ]
+        }
+    ]
 }
 POLICY
 }
