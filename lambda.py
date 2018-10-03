@@ -40,7 +40,17 @@ def eventExecution(**event):
                 except:
                     print('exception occured..')
                     continue
-	 
+                
+    elif eventName == 'PutBucketPolicy':
+        print(eventName)
+        policy = event['detail']['requestParameters']['bucketPolicy']['Statement'][0]['Action']
+        if policy == 's3:GetObject':
+            publicPermissions.append("read")
+            print('if: ',publicPermissions)
+        elif policy == 's3:PutObject':
+            publicPermissions.append("write")
+            print('elif: ',publicPermissions)
+            
     else:
         # eventType = "created bucket";
         acl =  event['detail']['requestParameters']['x-amz-acl']
@@ -51,6 +61,7 @@ def eventExecution(**event):
             publicPermissions.append("write")  
     
     if len(publicPermissions) != 0:
+        print (publicPermissions)
         sns = boto3.client(service_name="sns")
         topicArn = os.environ['snsTopicArn']
         #remove duplicate
@@ -61,7 +72,7 @@ def eventExecution(**event):
         sns.publish(
         TopicArn = topicArn,
             Message = 'The following S3 bucket permission has been changed to public ' + access.join(duplicateRemovedLIst) +
-            ' Access. \n\n Account_ID: ' +str(accountid)+'\n BucketName: ' +str(bucketname)+'\n IAM User Changed the permission: ' +user+'\n\n Note:- Lambda Revert it Back to private state.'
+            ' Access. \n\n Account_ID: ' +str(accountid)+'\n BucketName: ' +str(bucketname)+'\n IAM User Changed the permission: ' +user
         )
         s3.put_bucket_acl(Bucket = bucketname, ACL = 'private')
     return
@@ -81,7 +92,7 @@ def getUserDetails(event):
     if userIdentity['type'] == "Root":
         user = "Root"
     elif userIdentity['type'] == "IAMUser":
-        user = "IAM user '" + userIdentity.userName + "'"
+        user = "IAM user " + userIdentity['userName']
     else:
         user = "Service user" 
     return user

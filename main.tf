@@ -162,7 +162,6 @@ resource "aws_iam_role_policy" "lambda_policy" {
             "Effect": "Allow",
             "Action": [
                 "logs:CreateLogStream",
-				"logs:CreateLogGroup",
                 "sns:Publish",
                 "logs:PutLogEvents"
             ],
@@ -175,6 +174,22 @@ resource "aws_iam_role_policy" "lambda_policy" {
             "Sid": "VisualEditor1",
             "Effect": "Allow",
             "Action": "s3:*",
+            "Resource": "*"
+        },
+        {
+            "Sid": "VisualEditor2",
+            "Effect": "Allow",
+            "Action": "logs:CreateLogGroup",
+            "Resource": "arn:aws:logs:*:*:*"
+        },
+        {
+            "Sid": "LambdaBasicExecutionAccess",
+            "Effect": "Allow",
+            "Action": [
+                "logs:CreateLogGroup",
+                "logs:CreateLogStream",
+                "logs:PutLogEvents"
+            ],
             "Resource": "*"
         }
     ]
