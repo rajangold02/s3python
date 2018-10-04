@@ -17,6 +17,9 @@ def lambda_handler(event, context):
     except:    
         eventExecution(**event)
 
+#Skip Event Execution Using Tagset By Comparing Tag Value.
+#Calling **event from event parameters.
+#Checking condition for bucket acl, bucket policy and Creating acl while creating bucket 
 def eventExecution(**event):
     allUsersUri = 'http://acs.amazonaws.com/groups/global/AllUsers'
     authenticatedUsersUri = 'http://acs.amazonaws.com/groups/global/AuthenticatedUsers'
@@ -37,31 +40,32 @@ def eventExecution(**event):
                                 publicPermissions.append('read')
                             else:
                                 publicPermissions.append('write')
+		
                 except:
                     print('exception occured..')
                     continue
-                
+        s3.put_bucket_acl(Bucket = bucketname, ACL = 'private')		
+		
     elif eventName == 'PutBucketPolicy':
-        print(eventName)
-        policy = event['detail']['requestParameters']['bucketPolicy']['Statement'][0]['Action']
+        s3.delete_bucket_policy(Bucket=bucketname)
+        policy = event['detail']['requestParameters']['bucketPolicy']['Statement'][0]['Action'][0]
         if policy == 's3:GetObject':
             publicPermissions.append("read")
-            print('if: ',publicPermissions)
         elif policy == 's3:PutObject':
             publicPermissions.append("write")
-            print('elif: ',publicPermissions)
             
     else:
         # eventType = "created bucket";
         acl =  event['detail']['requestParameters']['x-amz-acl']
+        s3.put_bucket_acl(Bucket = bucketname, ACL = 'private')				
         if acl[0] == 'public-read':
             publicPermissions.append("read")
         elif (acl[0] == "public-read-write"):
             publicPermissions.append("read")
-            publicPermissions.append("write")  
-    
+            publicPermissions.append("write")        
+
+#Mail Trigger Function based on event inputs.			
     if len(publicPermissions) != 0:
-        print (publicPermissions)
         sns = boto3.client(service_name="sns")
         topicArn = os.environ['snsTopicArn']
         #remove duplicate
@@ -74,16 +78,17 @@ def eventExecution(**event):
             Message = 'The following S3 bucket permission has been changed to public ' + access.join(duplicateRemovedLIst) +
             ' Access. \n\n Account_ID: ' +str(accountid)+'\n BucketName: ' +str(bucketname)+'\n IAM User Changed the permission: ' +user
         )
-        s3.put_bucket_acl(Bucket = bucketname, ACL = 'private')
     return
 
+#Removing Duplicates like (read,read) (write,write)
 def remove(duplicate):
     final_list = []
     for num in duplicate:
         if num not in final_list:
             final_list.append(num)
     return final_list     
-    
+
+#Event User Info.    
 def getUserDetails(event):
 
     userIdentity = event['detail']['userIdentity']
