@@ -11,7 +11,7 @@ variable "secret_key" {
 }
 
 variable "alert_email_address" {
-  default = "rajr@geakminds.com"
+  description = "Please Provide Email-id"
 }
 
 variable "cloudtrail_s3_bucket_name" {

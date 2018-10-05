@@ -171,10 +171,22 @@ resource "aws_iam_role_policy" "lambda_policy" {
             ]
         },
         {
-            "Sid": "VisualEditor1",
+            "Sid": "S3GetBucketACLandPolicy",
             "Effect": "Allow",
-            "Action": "s3:*",
+            "Action": [
+                "s3:GetBucketAcl",
+                "s3:GetBucketPolicy"
+            ],
             "Resource": "*"
+        },
+		{
+            "Sid": "S3PutBucketACLAccess",
+            "Effect": "Allow",
+            "Action": [
+                "s3:PutBucketAcl",
+                "s3:PutBucketPolicy"
+            ],
+            "Resource": "arn:aws:s3:::*"
         },
         {
             "Sid": "VisualEditor2",
